@@ -16,12 +16,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"/>
-        <View
-            android:id="@+id/statusView"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="#FF0F0F"
-            />
         </LinearLayout>
 
     <LinearLayout
@@ -40,6 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
+            android:inputType="phone"
             android:hint="receipent"
 
             />
