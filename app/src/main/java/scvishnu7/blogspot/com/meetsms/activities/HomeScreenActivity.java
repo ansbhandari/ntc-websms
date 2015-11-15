@@ -1,5 +1,6 @@
 package scvishnu7.blogspot.com.meetsms.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -49,6 +50,7 @@ public class HomeScreenActivity extends ActionBarActivity {
     private Handler backgroundHandler;
 
     private NetworkHelper networkHelper;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,7 @@ public class HomeScreenActivity extends ActionBarActivity {
         receiversEditText = (EditText) findViewById(R.id.receiversEditText);
         messageEditText = (EditText) findViewById(R.id.messageTextEditText);
 
+        progressDialog = new ProgressDialog(HomeScreenActivity.this);
 
         // Background Thread
         Log.d("Main","Starting bghandler register");
@@ -75,8 +78,9 @@ public class HomeScreenActivity extends ActionBarActivity {
         searchContactButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Toast.makeText(HomeScreenActivity.this,"Will implement later",Toast.LENGTH_SHORT).show();
-                launchContactPicker();
+                Toast.makeText(HomeScreenActivity.this,"Will implement later",Toast.LENGTH_SHORT).show();
+//                launchContactPicker();
+
             }
         });
 
@@ -87,9 +91,17 @@ public class HomeScreenActivity extends ActionBarActivity {
                 String message=messageEditText.getText().toString();
                 String recipient = receiversEditText.getText().toString();
 
+                //Show progessbar
+
+
             if ( message ==  null || message.trim().length() ==0 || recipient == null || recipient.trim().length() == 0){
                     Toast.makeText(HomeScreenActivity.this, "Please provide recipient and message text.",Toast.LENGTH_SHORT).show();
             } else {
+                progressDialog.setMessage("Sending Message ...");
+                progressDialog.setIndeterminate(true);
+                progressDialog.setCancelable(false);
+
+                progressDialog.show();
                     sendSMSNow(message, recipient);
                 }
 
@@ -178,6 +190,9 @@ public class HomeScreenActivity extends ActionBarActivity {
                     @Override
                     public void onCompleted() {
                         Log.d("Counter", "onComplete of subscriber");
+                        //STOP progress bar
+                        progressDialog.dismiss();
+                        Toast.makeText(getApplicationContext(), "SMS send successfully",Toast.LENGTH_LONG).show();
                     }
 
                     @Override
