@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Meet SMS</string>
-    <string name="titleText">WebSMS from NTC: via meet.net.np!</string>
+    <string name="titleText">WebSMS from NTC!</string>
     <string name="action_settings">Settings</string>
 
 </resources>

@@ -96,8 +96,18 @@ public class NetworkHelper {
      *          false on failure of login
      *
      *           --data "username=$username" --data "password=$password" --data "loginPage=true" --data "loginbut=login"  -c cookies.dat
+     *
+     *           Success Msg
+     *           <ul class="elgg-system-messages"><li class="hidden"></li><li class="elgg-message elgg-state-success">You have been logged in.</li></ul>                         </div>
+
+
+        Error Msg
+    <ul class="elgg-system-messages"><li class="hidden"></li><li class="elgg-message elgg-state-error">We could not log you in. Please check your username/email and password.</li></ul>            </div>
+
      */
     public boolean requestLogin(String uname, String pass){
+
+        boolean status=false;
 
         ArrayList<NameValuePair> postData=new ArrayList<>();
         postData.add(new BasicNameValuePair("username",uname));
@@ -115,13 +125,16 @@ public class NetworkHelper {
             while( (line=bfreader.readLine())!=null){
                 content.append(line);
                 Log.d("Utils",line+"\n");
+                if( line.contains("You have been logged in")){
+                    status = true;
+                    break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
-        return true;
+        return status;
     }
 
     /**
@@ -129,9 +142,22 @@ public class NetworkHelper {
      * @return
      *
      * "recipient=$recipient" --data "message=$message" --data "sendbutton=Send Now" -b cookies.dat -v
+     *
+     * Success MSG
+     * <ul class="elgg-system-messages"><li class="hidden"></li><li class="elgg-message elgg-state-success">Your messages for 1 recipients were saved for submission.</li></ul>                                </div>
+
+     Quote MSG
+    <p style="color:chocolate"><b>Free SMS Quota:10 ; Subscribed SMS Quota:0 ; Used SMS Quota : 2</b></p>
+
+
+     No Login MSG
+    <ul class="elgg-system-messages"><li class="hidden"></li><li class="elgg-message elgg-state-error">You must be logged in to view that page.</li></ul>           </div>
+
+
      */
     public boolean sendSms(String message, String recipient) {
 
+        boolean status=false;
         ArrayList<NameValuePair> postData = new ArrayList<>();
         postData.add(new BasicNameValuePair("recipient",recipient));
         postData.add(new BasicNameValuePair("message",message));
@@ -146,15 +172,18 @@ public class NetworkHelper {
             bfreader = simpleHttpReq(sendMessageUrl,postData);
             while( (line = bfreader.readLine()) != null) {
 //                content.append(line);
-                Log.d("Utils",line+"\n");
+//                Log.d("Utils sendsms",line+"\n");
+                if(line.contains("Your messages for 1 recipients were saved for submission")){
+                    status=true;
+                    break;
+                }
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
-        return true;
+        return status;
     }
 
 

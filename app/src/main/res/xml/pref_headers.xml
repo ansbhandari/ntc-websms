@@ -8,10 +8,6 @@
 
     <header
         android:fragment="scvishnu7.blogspot.com.meetsms.activities.SettingsActivity$NotificationPreferenceFragment"
-        android:title="@string/pref_header_notifications" />
-
-    <header
-        android:fragment="scvishnu7.blogspot.com.meetsms.activities.SettingsActivity$DataSyncPreferenceFragment"
-        android:title="@string/pref_header_data_sync" />
+        android:title="@string/pref_header_msg_setting" />
 
 </preference-headers>

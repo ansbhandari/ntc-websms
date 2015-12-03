@@ -1,5 +1,7 @@
 package scvishnu7.blogspot.com.meetsms.helpers;
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
@@ -17,12 +19,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by vishnu on 11/11/15.
  */
 public class Utils {
+
+    public static final String TAG="Utils";
+    public static final String pref_key_uname="pref_username";
+    public static final String pref_key_pass="pref_password";
+    public static final String pref_key_signature_on="signature_on";
+    public static final String pref_key_msg_signature ="pref_msg_signature";
 
     public static BufferedReader executeSystemCommand(String command){
         Process process=null;
@@ -92,6 +102,23 @@ public class Utils {
         // shut down the connection manager to ensure
         // immediate deallocation of all system resources
         httpclient.getConnectionManager().shutdown();
+    }
+
+    public static void dumpIntent(Intent i){
+
+        Bundle bundle = i.getExtras();
+        if (bundle != null) {
+            Set<String> keys = bundle.keySet();
+            Iterator<String> it = keys.iterator();
+            Log.e(TAG,"Dumping Intent start");
+            while (it.hasNext()) {
+                String key = it.next();
+                Log.e(TAG,"[" + key + "=" + bundle.get(key)+"]");
+            }
+            Log.e(TAG,"Dumping Intent end");
+        } else {
+            Log.e(TAG,"Bundle is null");
+        }
     }
 
 }

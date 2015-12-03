@@ -7,15 +7,24 @@
 
     <LinearLayout
         android:id="@+id/titleLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
             android:id="@+id/titlebarTextView"
             android:text="@string/titleText"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="5"/>
+            android:textSize="@dimen/medium_info_font"
+            />
+        <TextView
+            android:id="@+id/quotaTextView"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="5/10 sms today"
+            />
         </LinearLayout>
 
     <LinearLayout
@@ -54,6 +63,54 @@
             android:inputType="textMultiLine"
             android:gravity="top"
             />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top"
+            >
+
+
+        <TextView
+            android:id="@+id/charCounterTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:textSize="@dimen/medium_info_font"
+            android:textStyle="bold"
+            android:text="304"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_marginTop="5dp"
+            android:textSize="@dimen/medium_info_font"
+            android:text="chars remaining;"
+            />
+
+        <TextView
+            android:id="@+id/smsCountTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:textSize="@dimen/medium_info_font"
+            android:textStyle="bold"
+            android:text="0"
+            />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:textSize="@dimen/medium_info_font"
+                android:text="sms"
+                />
+
         <Button
             android:id="@+id/sendButton"
             android:layout_width="wrap_content"
@@ -63,7 +120,7 @@
             android:paddingRight="30dp"
             android:text="Send"
             />
-
+        </LinearLayout>
         </LinearLayout>
     <LinearLayout
         android:id="@+id/registerView"
