@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -66,6 +67,11 @@ public class HomeScreenActivity extends ActionBarActivity {
     private Button registerButton;
 
     private Boolean isLogined=false;
+    private Boolean isSignatureOn=false;
+    private String signature;
+    private String uname;
+    private String pass;
+    private int textLimit;
 
     private Handler backgroundHandler;
 
@@ -83,11 +89,12 @@ public class HomeScreenActivity extends ActionBarActivity {
         prefHelper = new PreferenceHelper(context);
         checkSMSsentDate();
 
+        charCounterTextView = (TextView) findViewById(R.id.charCounterTextView);
+
         sendSMSView = (LinearLayout) findViewById(R.id.sendsmsView);
         registerView = (LinearLayout) findViewById(R.id.registerView);
 
         receiversEditText = (EditText) findViewById(R.id.receiversEditText);
-        charCounterTextView = (TextView) findViewById(R.id.charCounterTextView);
         smsCounterTextView = (TextView) findViewById(R.id.smsCountTextView);
         quotaTextView = (TextView) findViewById(R.id.quotaTextView);
 
@@ -100,12 +107,12 @@ public class HomeScreenActivity extends ActionBarActivity {
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //This sets a textview to the current length
-                int charRemaning = Constants.CharacterLimit-s.length();
-                if(charRemaning==Constants.CharacterLimit) {
+                int charRemaning = textLimit-s.length();
+                if(charRemaning==textLimit) {
                     charCounterTextView.setTextColor(Color.BLACK);
                     smsCounterTextView.setText("0");
                     sendButton.setEnabled(true);
-                } else if( charRemaning > (Constants.CharacterLimit-Constants.SingleSMSSize) ){
+                } else if( charRemaning > (textLimit-Constants.SingleSMSSize) ){
                     charCounterTextView.setTextColor(Color.BLACK);
                     smsCounterTextView.setText("1");
                     sendButton.setEnabled(true);
@@ -159,19 +166,23 @@ public class HomeScreenActivity extends ActionBarActivity {
             if ( message ==  null || message.trim().length() ==0 || recipient == null || recipient.trim().length() == 0){
                     Toast.makeText(HomeScreenActivity.this, "Please provide recipient and message text.",Toast.LENGTH_SHORT).show();
             } else {
+                try  {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                } catch (Exception e) {
+
+                }
                 progressDialog.setMessage("Sending Message ...");
                 progressDialog.setIndeterminate(true);
                 progressDialog.setCancelable(false);
 
                 progressDialog.show();
 
-                String uname= PreferenceManager
-                        .getDefaultSharedPreferences(getApplicationContext())
-                        .getString(Utils.pref_key_uname, "");
-                String pass= PreferenceManager
-                        .getDefaultSharedPreferences(getApplicationContext())
-                        .getString(Utils.pref_key_pass, "");
-                Log.d("Prefs",uname+" :: "+pass);
+                if(isSignatureOn){
+                    message=message+" "+signature;
+                }
+
+                Log.d("Prefs",uname+" :: "+pass+" :: "+message);
 
                     sendSMSNow(message, recipient, uname, pass);
                 }
@@ -181,6 +192,7 @@ public class HomeScreenActivity extends ActionBarActivity {
 
 
     }
+
 
     private void launchContactPicker() {
         Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
@@ -292,6 +304,27 @@ public class HomeScreenActivity extends ActionBarActivity {
     @Override
     public void onResume(){
         super.onResume();
+
+//            Toast.makeText(context,"OnResume",Toast.LENGTH_LONG).show();
+            signature="";
+            isSignatureOn = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Utils.pref_key_signature_on,false);
+            if( isSignatureOn ) {
+                signature = PreferenceManager
+                        .getDefaultSharedPreferences(getApplicationContext())
+                        .getString(Utils.pref_key_msg_signature, "");
+                textLimit=Constants.CharacterLimit-signature.length()-1;
+            } else {
+                textLimit=Constants.CharacterLimit;
+            }
+        charCounterTextView.setText(textLimit+"");
+
+        uname= PreferenceManager
+                    .getDefaultSharedPreferences(getApplicationContext())
+                    .getString(Utils.pref_key_uname, "");
+            pass= PreferenceManager
+                    .getDefaultSharedPreferences(getApplicationContext())
+                    .getString(Utils.pref_key_pass, "");
+
     }
 
     @Override
@@ -357,7 +390,7 @@ public class HomeScreenActivity extends ActionBarActivity {
                         } else if (s.contains("sms_sent")){
                             Toast.makeText(getApplicationContext(), "SMS send successfully", Toast.LENGTH_LONG).show();
                             checkSMSsentDate();
-                            prefHelper.setSMSSentToday(prefHelper.getSmsSentToday()+1);
+                            prefHelper.setSMSSentToday(prefHelper.getSmsSentToday() + 1);
                             quotaTextView.setText(prefHelper.getSmsSentToday()+"/10 sms today");
                         } else if (s.contains("sms_send_failed")){
                             Toast.makeText(getApplicationContext(), "Failed to send sms.", Toast.LENGTH_LONG).show();
