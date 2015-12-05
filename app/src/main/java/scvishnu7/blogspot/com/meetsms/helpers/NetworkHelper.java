@@ -1,5 +1,6 @@
 package scvishnu7.blogspot.com.meetsms.helpers;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.apache.http.NameValuePair;
@@ -38,10 +39,12 @@ public class NetworkHelper {
     private static final String loginUrl="http://www.meet.net.np/meet/action/login";
     private static final String sendMessageUrl="http://www.meet.net.np/meet/mod/sms/actions/send.php";
     CookieManager cookieManager = new CookieManager();
+    Context context;
 
-    public NetworkHelper() {
+    public NetworkHelper(Context context) {
         CookieHandler.setDefault(cookieManager);
         Log.d("NetworkHelper","Constructor here");
+        this.context = context;
     }
 
     private BufferedReader simpleHttpReq(String link, ArrayList<NameValuePair> postData) throws IOException {
@@ -175,7 +178,13 @@ public class NetworkHelper {
 //                Log.d("Utils sendsms",line+"\n");
                 if(line.contains("Your messages for 1 recipients were saved for submission")){
                     status=true;
-                    break;
+                    }
+
+                if (status && line.contains("Used SMS Quota")){
+                    int indexQuotaMsg = line.indexOf("Used SMS Quota");
+                    String[] quotamsg=line.substring(indexQuotaMsg).split(":");
+                    int quota=Integer.parseInt(quotamsg[1].replaceAll("[^0-9]", ""));
+                    new PreferenceHelper(context).setSMSSentToday(quota);
                 }
             }
 

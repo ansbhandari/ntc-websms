@@ -85,7 +85,7 @@ public class HomeScreenActivity extends ActionBarActivity {
         setContentView(R.layout.activity_home_screen);
 
         context=HomeScreenActivity.this;
-        networkHelper = new NetworkHelper();
+        networkHelper = new NetworkHelper(context);
         prefHelper = new PreferenceHelper(context);
         checkSMSsentDate();
 
@@ -386,11 +386,9 @@ public class HomeScreenActivity extends ActionBarActivity {
                         Log.d("Counter", "onNext(" + s + ")");
                         if(s.contains("login_failed")){
                             Toast.makeText(getApplicationContext(), "Login Failed. Check username and/or password", Toast.LENGTH_LONG).show();
-
                         } else if (s.contains("sms_sent")){
                             Toast.makeText(getApplicationContext(), "SMS send successfully", Toast.LENGTH_LONG).show();
                             checkSMSsentDate();
-                            prefHelper.setSMSSentToday(prefHelper.getSmsSentToday() + 1);
                             quotaTextView.setText(prefHelper.getSmsSentToday()+"/10 sms today");
                         } else if (s.contains("sms_send_failed")){
                             Toast.makeText(getApplicationContext(), "Failed to send sms.", Toast.LENGTH_LONG).show();
