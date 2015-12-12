@@ -15,8 +15,12 @@
 
     <!-- Example settings for Notifications -->
     <string name="pref_header_msg_setting">Message settings</string>
+    <string name="pref_header_recipient">Recipients Settings</string>
+    <string name="pref_default_recipient_number">Default Recipient Number(s)</string>
+
 
     <string name="pref_title_append_signature">Append signature on message</string>
+    <string name="pref_title_default_recipient">Default Recipient</string>
 
     <string name="pref_title_msg_signature">Signature</string>
     <string name="pref_default_signature">:scvishnu7</string>

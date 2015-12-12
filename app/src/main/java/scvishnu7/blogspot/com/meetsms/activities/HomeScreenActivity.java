@@ -85,6 +85,7 @@ public class HomeScreenActivity extends ActionBarActivity {
         setContentView(R.layout.activity_home_screen);
 
         context=HomeScreenActivity.this;
+
         networkHelper = new NetworkHelper(context);
         prefHelper = new PreferenceHelper(context);
         checkSMSsentDate();
@@ -161,6 +162,15 @@ public class HomeScreenActivity extends ActionBarActivity {
                 String message=messageEditText.getText().toString();
                 String recipient = receiversEditText.getText().toString();
                 //Show progessbar
+
+                boolean isDefaultRecipient=PreferenceManager
+                        .getDefaultSharedPreferences(context)
+                        .getBoolean(Utils.pref_key_default_recipient, false);
+                if( recipient.trim().length()==0 && isDefaultRecipient ){
+                    recipient=PreferenceManager
+                            .getDefaultSharedPreferences(context)
+                            .getString(Utils.pref_key_recipient_number, "");
+                }
 
 
             if ( message ==  null || message.trim().length() ==0 || recipient == null || recipient.trim().length() == 0){

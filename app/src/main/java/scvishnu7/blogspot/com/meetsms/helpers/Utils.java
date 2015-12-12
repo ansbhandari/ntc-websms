@@ -33,6 +33,8 @@ public class Utils {
     public static final String pref_key_pass="pref_password";
     public static final String pref_key_signature_on="signature_on";
     public static final String pref_key_msg_signature ="pref_msg_signature";
+    public static final String pref_key_default_recipient ="default_recipient";
+    public static final String pref_key_recipient_number ="pref_recipient_number";
 
     public static BufferedReader executeSystemCommand(String command){
         Process process=null;

@@ -104,6 +104,12 @@ public class SettingsActivity extends PreferenceActivity {
         getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_signature);
 
+        // Add 'notifications' preferences, and a corresponding header.
+        fakeHeader = new PreferenceCategory(this);
+        fakeHeader.setTitle(R.string.pref_header_recipient);
+        getPreferenceScreen().addPreference(fakeHeader);
+        addPreferencesFromResource(R.xml.pref_recipient);
+
 
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
@@ -113,6 +119,7 @@ public class SettingsActivity extends PreferenceActivity {
         findPreference(Utils.pref_key_pass).setSummary("Your password for meet.net.np");
 //        bindPreferenceSummaryToValue(findPreference("signature_on"));
         bindPreferenceSummaryToValue(findPreference(Utils.pref_key_msg_signature));
+        bindPreferenceSummaryToValue(findPreference(Utils.pref_key_recipient_number));
 
     }
 
@@ -209,6 +216,7 @@ public class SettingsActivity extends PreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(Utils.pref_key_uname));
+            bindPreferenceSummaryToValue(findPreference(Utils.pref_key_recipient_number));
 //            bindPreferenceSummaryToValue(findPreference(Utils.pref_key_pass));
             findPreference(Utils.pref_key_pass).setSummary("Your password for meet.net.np");
         }
@@ -231,6 +239,8 @@ public class SettingsActivity extends PreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(Utils.pref_key_signature_on));
             bindPreferenceSummaryToValue(findPreference(Utils.pref_key_msg_signature));
+            bindPreferenceSummaryToValue(findPreference(Utils.pref_key_default_recipient));
+            bindPreferenceSummaryToValue(findPreference(Utils.pref_key_recipient_number));
 
 
         }
