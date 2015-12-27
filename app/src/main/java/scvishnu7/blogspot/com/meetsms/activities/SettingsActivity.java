@@ -13,8 +13,12 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 import java.util.List;
 
+import scvishnu7.blogspot.com.meetsms.MeetMeSMSApplication;
 import scvishnu7.blogspot.com.meetsms.R;
 import scvishnu7.blogspot.com.meetsms.helpers.Utils;
 
@@ -37,11 +41,24 @@ public class SettingsActivity extends PreferenceActivity {
      * shown on tablets.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+    private Tracker mTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Obtain the shared Tracker instance.
+        MeetMeSMSApplication application = (MeetMeSMSApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+
         setupActionBar();
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        mTracker.setScreenName("Settings Screen");
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     /**

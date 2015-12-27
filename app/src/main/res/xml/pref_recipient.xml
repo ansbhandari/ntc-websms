@@ -2,6 +2,7 @@
 
     <!-- A 'parent' preference, which enables/disables child preferences (below)
          when checked/unchecked. -->
+
     <CheckBoxPreference
         android:key="default_recipient"
         android:title="@string/pref_title_default_recipient"

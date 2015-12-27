@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MeetMeSMS.iml" filepath="$PROJECT_DIR$/MeetMeSMS.iml" />
-      <module fileurl="file://$PROJECT_DIR$/MeetSMS.iml" filepath="$PROJECT_DIR$/MeetSMS.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
 </project>
-

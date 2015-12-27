@@ -21,26 +21,37 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.android.schedulers.HandlerScheduler;
 import rx.functions.Func0;
+import scvishnu7.blogspot.com.meetsms.MeetMeSMSApplication;
 import scvishnu7.blogspot.com.meetsms.R;
+import scvishnu7.blogspot.com.meetsms.helpers.DatabaseHelper;
+import scvishnu7.blogspot.com.meetsms.helpers.HistoryListAdaptor;
 import scvishnu7.blogspot.com.meetsms.helpers.NetworkHelper;
 import scvishnu7.blogspot.com.meetsms.helpers.PreferenceHelper;
 import scvishnu7.blogspot.com.meetsms.helpers.Utils;
 import scvishnu7.blogspot.com.meetsms.models.Constants;
+import scvishnu7.blogspot.com.meetsms.models.Message;
 import scvishnu7.blogspot.com.meetsms.models.PhoneNumber;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -51,6 +62,7 @@ public class HomeScreenActivity extends ActionBarActivity {
     private static final String TAG="HomeScreen";
     private PreferenceHelper prefHelper;
     private static final int CONTACT_PICKER_RESULT = 1001;
+    private Tracker mTracker;
 
     private LinearLayout sendSMSView;
     private EditText receiversEditText;
@@ -61,6 +73,8 @@ public class HomeScreenActivity extends ActionBarActivity {
 
     private Button sendButton;
     private Button searchContactButton;
+
+    private ListView historyListView;
 
     private LinearLayout registerView;
     private Button gotoSettingButton;
@@ -74,6 +88,9 @@ public class HomeScreenActivity extends ActionBarActivity {
     private int textLimit;
 
     private Handler backgroundHandler;
+    private DatabaseHelper dbHelper;
+    private HistoryListAdaptor historyListAdaptor;
+    private ArrayList<Message> msgArraylist;
 
     private NetworkHelper networkHelper;
     private ProgressDialog progressDialog;
@@ -85,6 +102,9 @@ public class HomeScreenActivity extends ActionBarActivity {
         setContentView(R.layout.activity_home_screen);
 
         context=HomeScreenActivity.this;
+        // Obtain the shared Tracker instance.
+        MeetMeSMSApplication application = (MeetMeSMSApplication) getApplication();
+        mTracker = application.getDefaultTracker();
 
         networkHelper = new NetworkHelper(context);
         prefHelper = new PreferenceHelper(context);
@@ -100,6 +120,52 @@ public class HomeScreenActivity extends ActionBarActivity {
         quotaTextView = (TextView) findViewById(R.id.quotaTextView);
 
         quotaTextView.setText(prefHelper.getSmsSentToday()+"/10 sms today");
+        historyListView = (ListView) findViewById(R.id.historyListView);
+        dbHelper = new DatabaseHelper(context);
+        msgArraylist = dbHelper.getAllHistory();
+        historyListAdaptor = new HistoryListAdaptor(context,msgArraylist);
+        historyListView.setAdapter(historyListAdaptor );
+        historyListAdaptor.setNotifyOnChange(true);
+        historyListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+                final Message msg = msgArraylist.get(position);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dbHelper.deleteHistory(msg);
+                        msgArraylist.remove(msg);
+                        historyListAdaptor.notifyDataSetChanged();
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.setNeutralButton("ReSend", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        populateField(msg);
+                    }
+                });
+                builder.setTitle("Message Details");
+                String dateString = new SimpleDateFormat("yy/MM/dd HH:mm").format(new Date(Long.parseLong(msg.date)));
+                builder.setMessage("id: "+msg.id+
+                        "\nto: "+msg.to+
+                        "\nmsg: "+msg.msg+
+                        "\ndate: "+dateString+
+                        "\nstatus: "+msg.status);
+                builder.show();
+                return false;
+            }
+        });
+
 
         messageEditText = (EditText) findViewById(R.id.messageTextEditText);
         messageEditText.addTextChangedListener(new TextWatcher() {
@@ -151,7 +217,10 @@ public class HomeScreenActivity extends ActionBarActivity {
             public void onClick(View v) {
 //                Toast.makeText(HomeScreenActivity.this,"Will implement later",Toast.LENGTH_SHORT).show();
                 launchContactPicker();
-
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("Action")
+                        .setAction("Search Contact Clicked")
+                        .build());
             }
         });
 
@@ -170,6 +239,7 @@ public class HomeScreenActivity extends ActionBarActivity {
                     recipient=PreferenceManager
                             .getDefaultSharedPreferences(context)
                             .getString(Utils.pref_key_recipient_number, "");
+
                 }
 
 
@@ -182,6 +252,11 @@ public class HomeScreenActivity extends ActionBarActivity {
                 } catch (Exception e) {
 
                 }
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("Action")
+                        .setAction("Send Message Clicked")
+                        .build());
+
                 progressDialog.setMessage("Sending Message ...");
                 progressDialog.setIndeterminate(true);
                 progressDialog.setCancelable(false);
@@ -189,20 +264,22 @@ public class HomeScreenActivity extends ActionBarActivity {
                 progressDialog.show();
 
                 if(isSignatureOn){
-                    message=message+" "+signature;
+                    message=message+"\n"+signature;
                 }
 
                 Log.d("Prefs",uname+" :: "+pass+" :: "+message);
-
+                //supposed to call only after msg send is successed of failed...
                     sendSMSNow(message, recipient, uname, pass);
                 }
 
             }
         });
-
-
     }
 
+    private void populateField(Message msg){
+        receiversEditText.setText(msg.to);
+        messageEditText.setText(msg.msg);
+    }
 
     private void launchContactPicker() {
         Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
@@ -315,6 +392,9 @@ public class HomeScreenActivity extends ActionBarActivity {
     public void onResume(){
         super.onResume();
 
+        mTracker.setScreenName("HomeScreen Activity");
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
 //            Toast.makeText(context,"OnResume",Toast.LENGTH_LONG).show();
             signature="";
             isSignatureOn = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Utils.pref_key_signature_on,false);
@@ -367,7 +447,7 @@ public class HomeScreenActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    void sendSMSNow(String message, String recipient, String uname, String pass) {
+    void sendSMSNow(final String message, final String recipient, String uname, String pass) {
         String striped_recipient = recipient.replace("-","");
         sampleObservable(networkHelper, message, recipient, uname, pass)
                 //Run on BackgroundThread
@@ -396,12 +476,15 @@ public class HomeScreenActivity extends ActionBarActivity {
                         Log.d("Counter", "onNext(" + s + ")");
                         if(s.contains("login_failed")){
                             Toast.makeText(getApplicationContext(), "Login Failed. Check username and/or password", Toast.LENGTH_LONG).show();
+                            insertIntoDB(message,recipient,false);
                         } else if (s.contains("sms_sent")){
                             Toast.makeText(getApplicationContext(), "SMS send successfully", Toast.LENGTH_LONG).show();
+                            insertIntoDB(message,recipient,true);
                             checkSMSsentDate();
                             quotaTextView.setText(prefHelper.getSmsSentToday()+"/10 sms today");
                         } else if (s.contains("sms_send_failed")){
                             Toast.makeText(getApplicationContext(), "Failed to send sms.", Toast.LENGTH_LONG).show();
+                            insertIntoDB(message,recipient,false);
 
                         } else {
                             Toast.makeText(getApplicationContext(), "something else happened.. :O", Toast.LENGTH_LONG).show();
@@ -409,6 +492,14 @@ public class HomeScreenActivity extends ActionBarActivity {
                         }
                     }
                 });
+    }
+
+    void insertIntoDB(String msg, String to, boolean status){
+        int id=(int)dbHelper.addHistory(msg,to,status);
+        //insert object at top and reload table
+        Message message = new Message(id,msg,to,status);
+        msgArraylist.add(0,message);
+        historyListAdaptor.notifyDataSetChanged();
     }
 
     private void checkSMSsentDate(){
