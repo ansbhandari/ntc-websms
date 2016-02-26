@@ -3,6 +3,7 @@ package scvishnu7.blogspot.com.meetsms.helpers;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 /**
  * Created by vishnu on 12/3/15.
@@ -25,6 +26,7 @@ public class PreferenceHelper {
     public void setSMSSentToday(int smsCount){
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(keySMSSentToday,smsCount);
+        Log.v("PREFS","UPDATED prefs with "+smsCount);
         editor.commit();
     }
 
